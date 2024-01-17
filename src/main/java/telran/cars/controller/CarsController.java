@@ -48,7 +48,7 @@ public class CarsController {
 		return carsService.getOwnerCars(id);
 	}
 	
-	@GetMapping("cars/{carNumber}")
+	@GetMapping("{carNumber}")
 	PersonDto getCarOwner(@PathVariable String carNumber) {
 		return carsService.getCarOwner(carNumber);
 	}

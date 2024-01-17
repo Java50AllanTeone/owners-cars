@@ -1,8 +1,12 @@
 package telran.cars.exceptions.controller;
 
+import java.util.stream.Collectors;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.method.MethodValidationException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -20,5 +24,24 @@ public class CarsExceptionsController {
 	ResponseEntity<String> alreadyExistsHandler(IllegalStateException e) {
 		return new ResponseEntity<String>(e.getMessage(), HttpStatus.ALREADY_REPORTED);
 	}
+	
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	ResponseEntity<String> methodArgumentNotValidHandler(MethodArgumentNotValidException e) {
+		String message = e.getAllErrors()
+		.stream()
+		.map(error -> error.getDefaultMessage())
+		.collect(Collectors.joining(";"));
+		
+		return new ResponseEntity<String>(message, HttpStatus.BAD_REQUEST);
+	}
+	
+//	@ExceptionHandler(MethodValidationException.class)
+//	ResponseEntity<String> methodValidationHandler(MethodValidationException e) {
+//
+//		
+//	
+//		
+//		return new ResponseEntity<String>(message, HttpStatus.BAD_REQUEST);
+//	}
 
 }

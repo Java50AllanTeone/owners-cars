@@ -9,6 +9,7 @@ import org.springframework.validation.method.MethodValidationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
 import telran.cars.exceptions.NotFoundException;
 
@@ -35,13 +36,14 @@ public class CarsExceptionsController {
 		return new ResponseEntity<String>(message, HttpStatus.BAD_REQUEST);
 	}
 	
-//	@ExceptionHandler(MethodValidationException.class)
-//	ResponseEntity<String> methodValidationHandler(MethodValidationException e) {
-//
-//		
-//	
-//		
-//		return new ResponseEntity<String>(message, HttpStatus.BAD_REQUEST);
-//	}
+	@ExceptionHandler(HandlerMethodValidationException.class)
+	ResponseEntity<String> methodValidationHandler(HandlerMethodValidationException e) {	
+		String message = e.getAllErrors()
+				.stream()
+				.map(err -> err.getDefaultMessage())
+				.collect(Collectors.joining(";"));
+	
+		return new ResponseEntity<String>(message, HttpStatus.BAD_REQUEST);
+	}
 
 }

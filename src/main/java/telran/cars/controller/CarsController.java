@@ -53,26 +53,24 @@ public class CarsController {
 	@DeleteMapping("person/{id}")
 	PersonDto deletePerson(@PathVariable(name="id") @NotNull(message=MISSING_PERSON_ID_MESSAGE) 
 	@Min(value=MIN_PERSON_ID_VALUE, message=WRONG_MIN_PERSON_ID_VALUE) 
-	@Max(value=MAX_PERSON_ID_VALUE, message=WRONG_MAX_PERSON_ID_VALUE) long id) {
+	@Max(value=MAX_PERSON_ID_VALUE, message=WRONG_MAX_PERSON_ID_VALUE) Long id) {
 		return carsService.deletePerson(id);
 	}
 	
 	@DeleteMapping("{carNumber}")
-	CarDto deleteCar(@PathVariable(name="carNumber") @NotEmpty(message=MISSING_CAR_NUMBER_MESSAGE) @Pattern(regexp=CAR_NUMBER_REGEXP, message=WRONG_CAR_NUMBER_MESSAGE) String number,  
-			 @NotEmpty(message=MISSING_CAR_MODEL_MESSAGE) String carNumber) {
+	CarDto deleteCar(@PathVariable(name="carNumber") @NotEmpty(message=MISSING_CAR_NUMBER_MESSAGE) @Pattern(regexp=CAR_NUMBER_REGEXP, message=WRONG_CAR_NUMBER_MESSAGE) String carNumber) {
 		return carsService.deleteCar(carNumber);
 	}
 	
 	@GetMapping("person/{id}")
 	List<CarDto> getOwnerCars(@PathVariable @NotNull(message=MISSING_PERSON_ID_MESSAGE) 
 	@Min(value=MIN_PERSON_ID_VALUE, message=WRONG_MIN_PERSON_ID_VALUE) 
-	@Max(value=MAX_PERSON_ID_VALUE, message=WRONG_MAX_PERSON_ID_VALUE) long id) {
+	@Max(value=MAX_PERSON_ID_VALUE, message=WRONG_MAX_PERSON_ID_VALUE) Long id) {
 		return carsService.getOwnerCars(id);
 	}
 	
 	@GetMapping("{carNumber}")
-	PersonDto getCarOwner(@PathVariable @NotEmpty(message=MISSING_CAR_NUMBER_MESSAGE) @Pattern(regexp=CAR_NUMBER_REGEXP, message=WRONG_CAR_NUMBER_MESSAGE) String number,  
-			 @NotEmpty(message=MISSING_CAR_MODEL_MESSAGE) String carNumber) {
+	PersonDto getCarOwner(@PathVariable @NotEmpty(message=MISSING_CAR_NUMBER_MESSAGE) @Pattern(regexp=CAR_NUMBER_REGEXP, message=WRONG_CAR_NUMBER_MESSAGE) String carNumber) {
 		return carsService.getCarOwner(carNumber);
 	}
 	

@@ -11,19 +11,26 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
+import lombok.extern.slf4j.Slf4j;
 import telran.cars.exceptions.NotFoundException;
 
 @ControllerAdvice
+@Slf4j
 public class CarsExceptionsController {
 	
 	@ExceptionHandler(NotFoundException.class)
 	ResponseEntity<String> notFoundHandler(NotFoundException e) {
-		return new ResponseEntity<String>(e.getMessage(), HttpStatus.NOT_FOUND);
+		return returnResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+	}
+
+	private ResponseEntity<String> returnResponse(String message, HttpStatus status) {
+		log.error(message);
+		return new ResponseEntity<String>(message, status);
 	}
 	
 	@ExceptionHandler(IllegalStateException.class)
 	ResponseEntity<String> alreadyExistsHandler(IllegalStateException e) {
-		return new ResponseEntity<String>(e.getMessage(), HttpStatus.ALREADY_REPORTED);
+		return returnResponse(e.getMessage(), HttpStatus.ALREADY_REPORTED);
 	}
 	
 	@ExceptionHandler(MethodArgumentNotValidException.class)
@@ -33,7 +40,7 @@ public class CarsExceptionsController {
 		.map(error -> error.getDefaultMessage())
 		.collect(Collectors.joining(";"));
 		
-		return new ResponseEntity<String>(message, HttpStatus.BAD_REQUEST);
+		return returnResponse(message, HttpStatus.BAD_REQUEST);
 	}
 	
 	@ExceptionHandler(HandlerMethodValidationException.class)
@@ -43,7 +50,7 @@ public class CarsExceptionsController {
 				.map(err -> err.getDefaultMessage())
 				.collect(Collectors.joining(";"));
 	
-		return new ResponseEntity<String>(message, HttpStatus.BAD_REQUEST);
+		return returnResponse(message, HttpStatus.BAD_REQUEST);
 	}
 
 }

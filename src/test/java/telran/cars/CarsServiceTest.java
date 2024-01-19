@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 
 import telran.cars.dto.CarDto;
 import telran.cars.dto.PersonDto;
@@ -41,10 +42,12 @@ class CarsServiceTest {
 
 	
 	@Autowired
+	ApplicationContext ctx;
 	CarsService carsService;
 	
 	@BeforeEach
 	void setUp() {
+		carsService = ctx.getBean("carsService", CarsService.class);
 		carsService.addCar(car1);
 		carsService.addCar(car2);
 		carsService.addPerson(person1);
@@ -57,55 +60,30 @@ class CarsServiceTest {
 	void testAddPerson() {
 		assertEquals(personDto, carsService.addPerson(personDto));
 		assertThrowsExactly(IllegalStateException.class, () -> carsService.addPerson(person1));
-		
-		carsService.deletePerson(person1.id());
-		carsService.deletePerson(person2.id());
-		carsService.deletePerson(personDto.id());
-		carsService.deleteCar(car1.number());
-		carsService.deleteCar(car2.number());
 	}
 
 	@Test
 	void testAddCar() {
 		assertEquals(carDto, carsService.addCar(carDto));
 		assertThrowsExactly(IllegalStateException.class, () -> carsService.addCar(car1));
-		
-		carsService.deletePerson(person1.id());
-		carsService.deletePerson(person2.id());
-		carsService.deleteCar(carDto.number());
-		carsService.deleteCar(car1.number());
-		carsService.deleteCar(car2.number());
 	}
 
 	@Test
 	void testUpdatePerson() {
 		assertEquals(personUpdated, carsService.updatePerson(personUpdated));
 		assertThrowsExactly(IllegalStateException.class, () -> carsService.updatePerson(personDto));
-		
-		carsService.deletePerson(person1.id());
-		carsService.deletePerson(person2.id());
-		carsService.deleteCar(car1.number());
-		carsService.deleteCar(car2.number());
 	}
 
 	@Test
 	void testDeletePerson() {
 		assertEquals(person1, carsService.deletePerson(person1.id()));
 		assertThrowsExactly(IllegalStateException.class, () -> carsService.deletePerson(personDto.id()));
-
-		carsService.deletePerson(person2.id());
-		carsService.deleteCar(car1.number());
-		carsService.deleteCar(car2.number());
 	}
 
 	@Test
 	void testDeleteCar() {
 		assertEquals(car1, carsService.deleteCar(car1.number()));
 		assertThrowsExactly(IllegalStateException.class, () -> carsService.deleteCar(carDto.number()));
-		
-		carsService.deletePerson(person1.id());
-		carsService.deletePerson(person2.id());
-		carsService.deleteCar(car2.number());
 	}
 
 	@Test
@@ -117,11 +95,6 @@ class CarsServiceTest {
 		assertFalse(carsService.getOwnerCars(person1.id()).contains(car1));
 		assertTrue(carsService.getOwnerCars(person2.id()).contains(car1));
 		assertEquals(person2, carsService.getCarOwner(car1.number())); 
-		
-		carsService.deletePerson(person1.id());
-		carsService.deletePerson(person2.id());
-		carsService.deleteCar(car2.number());
-		carsService.deleteCar(car1.number());
 	}
 
 	@Test
@@ -132,12 +105,6 @@ class CarsServiceTest {
 		
 		carsService.addPerson(personDto);
 		assertArrayEquals(new CarDto[]{}, carsService.getOwnerCars(personDto.id()).toArray());
-
-		carsService.deletePerson(person1.id());
-		carsService.deletePerson(person2.id());
-		carsService.deletePerson(personDto.id());
-		carsService.deleteCar(car2.number());
-		carsService.deleteCar(car1.number());
 	}
 
 	@Test
@@ -147,12 +114,6 @@ class CarsServiceTest {
 		carsService.addCar(carDto);	
 		assertNull(carsService.getCarOwner(carDto.number()));
 		assertEquals(person1, carsService.getCarOwner(car1.number()));
-		
-		carsService.deletePerson(person1.id());
-		carsService.deletePerson(person2.id());
-		carsService.deleteCar(carDto.number());
-		carsService.deleteCar(car2.number());
-		carsService.deleteCar(car1.number());
 	}
 
 }

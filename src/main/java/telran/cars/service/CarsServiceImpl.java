@@ -3,12 +3,14 @@ package telran.cars.service;
 import java.util.*;
 import java.util.List;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import telran.cars.dto.*;
 import telran.cars.service.model.*;
 
-@Service
+@Service("carsService")
+@Scope("prototype")
 public class CarsServiceImpl implements CarsService {
 	HashMap<Long, CarOwner> owners = new HashMap<Long, CarOwner>();
 	HashMap<String, Car> cars = new HashMap<String, Car>();

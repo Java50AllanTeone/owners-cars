@@ -15,9 +15,10 @@ public class CarsServiceImpl implements CarsService {
 
 	@Override
 	public PersonDto addPerson(PersonDto personDto) {
-		CarOwner newOwner = owners.computeIfAbsent(personDto.id(), v -> new CarOwner(personDto));
+		CarOwner newOwner = new CarOwner(personDto);
+		CarOwner actualOwner = owners.computeIfAbsent(personDto.id(), v -> newOwner);
 		
-		if (newOwner == null)
+		if (!newOwner.equals(actualOwner))
 			throw new IllegalStateException("Person already exists");
 		
 		return personDto;
@@ -25,9 +26,10 @@ public class CarsServiceImpl implements CarsService {
 
 	@Override
 	public CarDto addCar(CarDto carDto) {
-		Car newCar = cars.computeIfAbsent(carDto.number(), v -> new Car(carDto));
+		Car newCar = new Car(carDto);
+		Car actualCar = cars.computeIfAbsent(carDto.number(), v -> newCar);
 		
-		if (newCar == null)
+		if (!newCar.equals(actualCar))
 			throw new IllegalStateException("Car already exists");
 		
 		return carDto;
@@ -75,8 +77,6 @@ public class CarsServiceImpl implements CarsService {
 		
 		if (newOwner == null)
 			throw new IllegalStateException("New owner is not exists");
-		if (newOwner.equals(prevOwner))
-			throw new IllegalStateException("New owner the previous owner");
 		
 		newOwner.getCars().add(car);
 		car.setOwner(newOwner);

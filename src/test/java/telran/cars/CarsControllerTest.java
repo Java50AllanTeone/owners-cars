@@ -28,10 +28,16 @@ import telran.cars.dto.CarDto;
 import telran.cars.dto.PersonDto;
 import telran.cars.dto.TradeDealDto;
 import telran.cars.exceptions.NotFoundException;
+import telran.cars.exceptions.controller.CarsExceptionsController;
 import telran.cars.service.CarsService;
+
+record PersonDtoIdString(String id, String name, String birthDate, String email) {
+
+}
 
 @WebMvcTest
 class CarsControllerTest {
+	static final String WRONG_PERSON_ID_TYPE = "abc";
 	private static final long PERSON_ID = 123000L;
 	private static final String CAR_NUMBER = "123-01-002";
 	private static final String CAR_WRONG_NUMBER = "123-010-002";
@@ -58,6 +64,8 @@ class CarsControllerTest {
 	PersonDto personNoName = new PersonDto(PERSON_ID, null, "2000-10-10", EMAIL_ADDRESS);
 	PersonDto personNoBirthDate = new PersonDto(PERSON_ID, "Vasya", null, EMAIL_ADDRESS);
 	PersonDto personWrongBirthDate = new PersonDto(PERSON_ID, "Vasya", "200-10-10", EMAIL_ADDRESS);
+	PersonDtoIdString personDtoWrongIdType = new PersonDtoIdString("abc", "Vasya", "2000-10-10", EMAIL_ADDRESS);
+
 	
 	CarDto carNoNumber = new CarDto(null, "model");
 	CarDto carWrongNumber = new CarDto(CAR_WRONG_NUMBER, "model");
@@ -266,6 +274,19 @@ class CarsControllerTest {
 	}
 	
 	@Test
+	void addPersonWrongIdTypeTest() throws Exception {
+		wrongPersonDataRequest(personDtoWrongIdType, CarsExceptionsController.JSON_TYPE_MISMATCH_MESSAGE);
+	}
+	
+	private void wrongPersonDataRequest(Object personDtoWrongData, String expectedMessage) throws  Exception {
+		String jsonPersonDto = mapper.writeValueAsString(personDtoWrongData); //conversion from carDto object to string JSON
+		String response = mockMvc.perform(post("http://localhost:8080/cars/person").contentType(MediaType.APPLICATION_JSON)
+				.content(jsonPersonDto)).andExpect(status().isBadRequest())
+				.andReturn().getResponse().getContentAsString();
+		assertEquals(expectedMessage, response);
+	}
+	
+	@Test
 	void addPersonNoEmailTest() throws Exception {
 		personValidationTests(personNoEmail, MISSING_PERSON_EMAIL, post("http://localhost:8080/cars/person"));
 	}
@@ -391,6 +412,13 @@ class CarsControllerTest {
 	@Test
 	void getCarOwnerWrongNumberTest() throws Exception {
 		getDeleteTests(WRONG_CAR_NUMBER_MESSAGE, get("http://localhost:8080/cars/" + CAR_WRONG_NUMBER));
+	}
+	
+	@Test
+	void testGetOwnerCarsMismatch() throws Exception{
+		String response = mockMvc.perform(get("http://localhost:8080/cars/person/" + WRONG_PERSON_ID_TYPE))
+				.andExpect(status().isBadRequest()).andReturn().getResponse().getContentAsString();
+		assertEquals(CarsExceptionsController.TYPE_MISMATCH_MESSAGE, response);
 	}
 	
 	

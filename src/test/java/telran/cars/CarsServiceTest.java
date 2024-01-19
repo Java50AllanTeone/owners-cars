@@ -2,6 +2,8 @@ package telran.cars;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +24,7 @@ class CarsServiceTest {
 	private static final String NAME1 = "name1";
 	private static final String BIRTH_DATE1 = "2000-10-10";
 	private static final String EMAIL_1 = "name1@gmail.com";
-	private static final Long PERSON_ID_2 = 123l;
+	private static final Long PERSON_ID_2 = 124l;
 	private static final String NAME2 = "name2";
 	private static final String BIRTH_DATE2 = "2000-10-10";
 	private static final String EMAIL_2 = "name2@gmail.com";
@@ -110,23 +112,47 @@ class CarsServiceTest {
 	void testPurchase() {
 		assertThrowsExactly(IllegalStateException.class, () -> carsService.purchase(new TradeDealDto(CAR_NUMBER_NOT_EXISTS, PERSON_ID_1)));
 		assertThrowsExactly(IllegalStateException.class, () -> carsService.purchase(new TradeDealDto(CAR_NUMBER_1, PERSON_ID_NOT_EXISTS)));
-		assertThrowsExactly(IllegalStateException.class, () -> carsService.purchase(new TradeDealDto(CAR_NUMBER_1, PERSON_ID_1)));
 		
 		carsService.purchase(new TradeDealDto(CAR_NUMBER_1, PERSON_ID_2));
-		
 		assertFalse(carsService.getOwnerCars(person1.id()).contains(car1));
 		assertTrue(carsService.getOwnerCars(person2.id()).contains(car1));
 		assertEquals(person2, carsService.getCarOwner(car1.number())); 
+		
+		carsService.deletePerson(person1.id());
+		carsService.deletePerson(person2.id());
+		carsService.deleteCar(car2.number());
+		carsService.deleteCar(car1.number());
 	}
 
 	@Test
 	void testGetOwnerCars() {
-		fail("Not yet implemented");
+		assertThrowsExactly(IllegalStateException.class, () -> carsService.getOwnerCars(personDto.id()));
+		
+		assertArrayEquals(new CarDto[]{car1}, carsService.getOwnerCars(person1.id()).toArray());
+		
+		carsService.addPerson(personDto);
+		assertArrayEquals(new CarDto[]{}, carsService.getOwnerCars(personDto.id()).toArray());
+
+		carsService.deletePerson(person1.id());
+		carsService.deletePerson(person2.id());
+		carsService.deletePerson(personDto.id());
+		carsService.deleteCar(car2.number());
+		carsService.deleteCar(car1.number());
 	}
 
 	@Test
 	void testGetCarOwner() {
-		fail("Not yet implemented");
+		assertThrowsExactly(IllegalStateException.class, () -> carsService.getCarOwner(carDto.number()));
+
+		carsService.addCar(carDto);	
+		assertNull(carsService.getCarOwner(carDto.number()));
+		assertEquals(person1, carsService.getCarOwner(car1.number()));
+		
+		carsService.deletePerson(person1.id());
+		carsService.deletePerson(person2.id());
+		carsService.deleteCar(carDto.number());
+		carsService.deleteCar(car2.number());
+		carsService.deleteCar(car1.number());
 	}
 
 }

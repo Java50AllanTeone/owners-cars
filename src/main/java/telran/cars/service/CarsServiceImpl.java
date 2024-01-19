@@ -15,50 +15,108 @@ public class CarsServiceImpl implements CarsService {
 
 	@Override
 	public PersonDto addPerson(PersonDto personDto) {
-		// TODO Auto-generated method stub
-		return null;
+		CarOwner newOwner = owners.computeIfAbsent(personDto.id(), v -> new CarOwner(personDto));
+		
+		if (newOwner == null)
+			throw new IllegalStateException("Person already exists");
+		
+		return personDto;
 	}
 
 	@Override
 	public CarDto addCar(CarDto carDto) {
-		// TODO Auto-generated method stub
-		return null;
+		Car newCar = cars.computeIfAbsent(carDto.number(), v -> new Car(carDto));
+		
+		if (newCar == null)
+			throw new IllegalStateException("Car already exists");
+		
+		return carDto;
 	}
 
 	@Override
 	public PersonDto updatePerson(PersonDto personDto) {
-		// TODO Auto-generated method stub
-		return null;
+		CarOwner updOwner = owners.computeIfPresent(personDto.id(), (k, v) -> new CarOwner(personDto));
+		
+		if (updOwner == null)
+			throw new IllegalStateException("Person is not exists");
+		
+		return personDto;
 	}
 
 	@Override
 	public PersonDto deletePerson(long id) {
-		// TODO Auto-generated method stub
-		return null;
+		CarOwner deletedOwner = owners.remove(id);
+		
+		if (deletedOwner == null)
+			throw new IllegalStateException("Person is not exists");
+			
+		return deletedOwner.build();
 	}
 
 	@Override
 	public CarDto deleteCar(String carNumber) {
-		// TODO Auto-generated method stub
-		return null;
+		Car deletedCar = cars.remove(carNumber);
+		
+		if (deletedCar == null)
+			throw new IllegalStateException("Car is not exists");
+		
+		return deletedCar.build();
 	}
 
 	@Override
 	public TradeDealDto purchase(TradeDealDto tradeDeal) {
-		// TODO Auto-generated method stub
-		return null;
+		Car car = cars.get(tradeDeal.carNumber());
+		
+		if (car == null)
+			throw new IllegalStateException("Car is not exists");
+		
+		CarOwner prevOwner = car.getOwner(); 
+		CarOwner newOwner = owners.get(tradeDeal.personId());
+		
+		if (newOwner == null)
+			throw new IllegalStateException("New owner is not exists");
+		if (newOwner.equals(prevOwner))
+			throw new IllegalStateException("New owner the previous owner");
+		
+		newOwner.getCars().add(car);
+		car.setOwner(newOwner);
+		
+		if (prevOwner != null)
+			prevOwner.getCars().remove(car);
+		
+		return tradeDeal;
 	}
 
 	@Override
 	public List<CarDto> getOwnerCars(long id) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return owners
+					.get(id)
+					.getCars()
+					.stream()
+					.map(c -> c.build())
+					.toList();
+		} catch (NullPointerException e) {
+			throw new IllegalStateException("Person is not exists");
+		}
+
 	}
 
 	@Override
 	public PersonDto getCarOwner(String carNumber) {
-		// TODO Auto-generated method stub
-		return null;
+		CarOwner owner;
+		
+		try {
+			owner = cars.get(carNumber).getOwner();
+		} catch (NullPointerException e) {
+			throw new IllegalStateException("Car is not exists");
+		}
+		
+		try {
+			return owner.build();
+		} catch (NullPointerException e) {
+			return null;
+		}
 	}
 
 }

@@ -91,5 +91,10 @@ public class CarsController {
 		return carsService.getCarOwner(carNumber);
 	}
 	
+	@GetMapping("models")
+	List<String> mostPopularCarModels() {
+		return carsService.mostPopularCarModels();
+	}
+	
 
 }

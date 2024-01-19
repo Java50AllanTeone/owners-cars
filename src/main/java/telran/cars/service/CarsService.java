@@ -13,5 +13,6 @@ CarDto deleteCar(String carNumber);
 TradeDealDto purchase(TradeDealDto tradeDeal);
 List<CarDto> getOwnerCars(long id);
 PersonDto getCarOwner(String carNumber);
+List<String> mostPopularCarModels();
 
 }

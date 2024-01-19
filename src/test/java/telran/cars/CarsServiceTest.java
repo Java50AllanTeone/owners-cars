@@ -2,6 +2,7 @@ package telran.cars;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +18,9 @@ import telran.cars.service.CarsService;
 
 @SpringBootTest
 class CarsServiceTest {
-	private static final String MODEL = "model";
+	private static final String MODEL1 = "model1";
+	private static final String MODEL2 = "model2";
+	private static final String MODEL3 = "model3";
 	private static final String CAR_NUMBER_1 = "111-11-111";
 	private static final String CAR_NUMBER_2 = "222-22-222";
 	private static final String CAR_NUMBER_3 = "333-33-333";
@@ -31,14 +34,14 @@ class CarsServiceTest {
 	private static final String EMAIL_2 = "name2@gmail.com";
 	private static final Long PERSON_ID_NOT_EXISTS = 111111111l;
 	private static final String CAR_NUMBER_NOT_EXISTS = "444-44-44";
-	CarDto car1 = new CarDto(CAR_NUMBER_1, MODEL);
-	CarDto car2 = new CarDto(CAR_NUMBER_2, MODEL);
-	CarDto car3 = new CarDto(CAR_NUMBER_3, MODEL);
+	CarDto car1 = new CarDto(CAR_NUMBER_1, MODEL1);
+	CarDto car2 = new CarDto(CAR_NUMBER_2, MODEL2);
+	CarDto car3 = new CarDto(CAR_NUMBER_3, MODEL3);
 	PersonDto person1 = new PersonDto(PERSON_ID_1, NAME1, BIRTH_DATE1, EMAIL_1);
 	PersonDto person2 = new PersonDto(PERSON_ID_2, NAME2, BIRTH_DATE2, EMAIL_2);
 	PersonDto personUpdated = new PersonDto(PERSON_ID_1, NAME1, BIRTH_DATE2, EMAIL_2);
 	PersonDto personDto = new PersonDto(PERSON_ID_NOT_EXISTS, NAME2, BIRTH_DATE2, EMAIL_2);
-	CarDto carDto = new CarDto(CAR_NUMBER_NOT_EXISTS, MODEL);
+	CarDto carDto = new CarDto(CAR_NUMBER_NOT_EXISTS, MODEL1);
 
 	
 	@Autowired
@@ -114,6 +117,24 @@ class CarsServiceTest {
 		carsService.addCar(carDto);	
 		assertNull(carsService.getCarOwner(carDto.number()));
 		assertEquals(person1, carsService.getCarOwner(car1.number()));
+	}
+	
+	@Test
+	void mostPopularCarModels_correct() {
+		carsService.addCar(car3);
+		carsService.addPerson(personDto);
+		carsService.purchase(new TradeDealDto(car3.number(), personDto.id()));
+		
+		String[] expected = new String[] {car1.model(), car2.model(), car3.model()};
+		String[] result = carsService.mostPopularCarModels().toArray(String[]::new);
+		Arrays.sort(result);
+		assertArrayEquals(expected, result);
+		
+		carsService.purchase(new TradeDealDto(car1.number(), personDto.id()));
+		expected = new String[] {car1.model()};
+		result = carsService.mostPopularCarModels().toArray(String[]::new);
+		Arrays.sort(result);
+		assertArrayEquals(expected, result);
 	}
 
 }

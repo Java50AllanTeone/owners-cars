@@ -14,6 +14,7 @@ import telran.cars.service.model.*;
 public class CarsServiceImpl implements CarsService {
 	HashMap<Long, CarOwner> owners = new HashMap<Long, CarOwner>();
 	HashMap<String, Car> cars = new HashMap<String, Car>();
+	HashMap<String, Integer> modelDeals = new HashMap<String, Integer>();
 
 	@Override
 	public PersonDto addPerson(PersonDto personDto) {
@@ -86,6 +87,8 @@ public class CarsServiceImpl implements CarsService {
 		if (prevOwner != null)
 			prevOwner.getCars().remove(car);
 		
+		modelDeals.merge(car.getModel(), 1, (oldValue, newValue) -> oldValue + newValue);
+		
 		return tradeDeal;
 	}
 
@@ -119,6 +122,20 @@ public class CarsServiceImpl implements CarsService {
 		} catch (NullPointerException e) {
 			return null;
 		}
+	}
+
+	@Override
+	public List<String> mostPopularCarModels() {
+		HashMap<Integer, ArrayList<String>> map = new HashMap<>();
+		
+		for (Map.Entry<String, Integer> entry : modelDeals.entrySet()) {
+			map.putIfAbsent(entry.getValue(), new ArrayList<String>());
+			map.computeIfPresent(entry.getValue(), (key, val) -> {
+				val.add(entry.getKey()); 
+				return val;
+				});
+		}
+		return map.get(map.size());
 	}
 
 }

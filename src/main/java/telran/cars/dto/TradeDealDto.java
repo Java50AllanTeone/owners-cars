@@ -1,18 +1,7 @@
 package telran.cars.dto;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.*;
-import telran.cars.service.model.Car;
-import telran.cars.service.model.CarOwner;
-
 import static telran.cars.api.ValidationConstants.*;
-
 
 
 public record TradeDealDto(
@@ -24,14 +13,4 @@ public record TradeDealDto(
 
 }
 
-//@Id
-//@GeneratedValue(strategy = GenerationType.IDENTITY)
-//long id;
-//@ManyToOne
-//@JoinColumn(name="car_number", nullable = false)
-//Car car;
-//@ManyToOne
-//@JoinColumn(name="owner_id")
-//CarOwner carOwner;
-//@Temporal(TemporalType.DATE)
-//LocalDate date;
+

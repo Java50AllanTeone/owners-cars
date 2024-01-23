@@ -2,10 +2,13 @@ package telran.cars.service;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import telran.cars.dto.CarDto;
 import telran.cars.dto.PersonDto;
 import telran.cars.dto.TradeDealDto;
 
+@Service
 public class CarsServiceImpl implements CarsService {
 
 	@Override

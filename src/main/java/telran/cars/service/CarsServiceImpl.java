@@ -59,23 +59,33 @@ public class CarsServiceImpl implements CarsService {
 	@Override
 	@Transactional
 	public PersonDto deletePerson(long id) {
+		Car car = carRepo.findByCarOwnerId(id);
 		
-		// TODO 
-		//HW #63
-		//find Car having being deleted owner
-		//If such car exists, set null as the car owner
-		//after that delete by the method deleteById from carOwnerRepo
-		return null;
+		if (car != null) {
+			car.setCarOwner(null);
+		}
+		PersonDto owner = carOwnerRepo
+				.findById(id)
+				.orElseThrow(() -> new PersonNotFoundException())
+				.build();
+		carOwnerRepo.deleteById(id);
+		return owner;
 	}
 
 	@Override
+	@Transactional
 	public CarDto deleteCar(String carNumber) {
-		// TODO 
-		//HW #63 
-		// find all TradeDeal entities for a given Car
-		// delete all such entities
-		// delete by the method deleteById from CarRepo
-		return null;
+		List<TradeDeal> tradeDeals = tradeDealRepo.findByCarNumber(carNumber);
+		
+		for (TradeDeal tradeDeal: tradeDeals)	 {
+			tradeDealRepo.delete(tradeDeal);
+		}
+		CarDto car = carRepo
+				.findById(carNumber)
+				.orElseThrow(() -> new CarNotFoundException())
+				.build();
+		carRepo.deleteById(carNumber);
+		return car;
 	}
 
 	@Override
@@ -119,9 +129,15 @@ public class CarsServiceImpl implements CarsService {
 
 	@Override
 	public ModelDto addModel(ModelDto modelDto) {
-		// TODO Auto-generated method stub
-		// HW #63 Write the method similar to the method addPerson
-		return null;
+		if (modelRepo.existsById(new ModelYear(modelDto.getModelName(), modelDto.getModelYear()))) {
+			throw new IllegalModelsStateException();
+		}
+		
+		Model model = Model.of(modelDto);
+		modelRepo.save(model);
+		log.debug("model {} has been saved", modelDto);
+		return modelDto;
 	}
+	
 
 }

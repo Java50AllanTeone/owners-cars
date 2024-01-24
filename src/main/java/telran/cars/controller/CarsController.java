@@ -93,7 +93,7 @@ public class CarsController {
 	
 	@GetMapping("models")
 	List<String> mostPopularCarModels() {
-		return carsService.mostPopularCarModels();
+		return carsService.mostPopularModels();
 	}
 	
 

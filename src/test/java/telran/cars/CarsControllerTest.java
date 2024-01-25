@@ -1,18 +1,26 @@
 package telran.cars;
+
 import static org.junit.jupiter.api.Assertions.*;
+
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import telran.cars.dto.*;
 import static telran.cars.api.ValidationConstants.*;
 import telran.cars.exceptions.NotFoundException;
@@ -35,32 +43,28 @@ class CarsControllerTest {
 	private static final long WRONG_PERSON_ID = 123L;
 	static final String WRONG_PERSON_ID_TYPE = "abc";
 	static final String WRONG_CAR_NUMBER = "kikuk";
+	private static final  String PURCHASE_DATE = "2024-01-01";
 	@MockBean //inserting into Application Context Mock instead of real Service implementation
 	CarsService carsService;
 	@Autowired //for injection of MockMvc from Application Context
 	MockMvc mockMvc;
-
 	CarDto carDto = new CarDto(CAR_NUMBER, "model", 2000, null, null, null);
 	CarDto carDto1 = new CarDto("car123", "mode123", 2000, null, null, null);
 	CarDto carDtoMissingFields = new CarDto(null, null, 2000, null, null, null);
-
+	
 	@Autowired //for injection of ObjectMapper from Application context
 	ObjectMapper mapper; //object for getting JSON from object and object from JSON
-
 	private PersonDto personDto = new PersonDto(PERSON_ID, "Vasya", "2000-10-10", EMAIL_ADDRESS);
 	PersonDto personDtoUpdated = new PersonDto(PERSON_ID, "Vasya", "2000-10-10", "vasya@tel-ran.com");
 	PersonDto personWrongEmail = new PersonDto(PERSON_ID, "Vasya", "2000-10-10", WRONG_EMAIL_ADDRESS);
 	PersonDto personNoId = new PersonDto(null, "Vasya", "2000-10-10", EMAIL_ADDRESS);
 	PersonDto personWrongId = new PersonDto(100000000000l, "Vasya", "2000-10-10", EMAIL_ADDRESS);
 	PersonDto personWrongBirthdate = new PersonDto(PERSON_ID, "Vasya", "2000-10", EMAIL_ADDRESS);
-
-	TradeDealDto tradeDeal = new TradeDealDto(CAR_NUMBER, PERSON_ID, null);
+	TradeDealDto tradeDeal = new TradeDealDto(CAR_NUMBER, PERSON_ID, PURCHASE_DATE);
 	PersonDtoIdString personDtoWrongIdType = new PersonDtoIdString("abc", "Vasya", "2000-10-10", EMAIL_ADDRESS);
 	PersonDto personAllFieldsMissing = new PersonDto(null, null, null, null);
-
-	TradeDealDto tradeDealWrongCarNumber = new TradeDealDto(WRONG_CAR_NUMBER, PERSON_ID, null);
-	TradeDealDto tradeDealWrongId = new TradeDealDto(CAR_NUMBER, -10l, null);
-	TradeDealDto tradeDealAllFieldsMissing = new TradeDealDto(null,null,null);
+	TradeDealDto tradeDealWrongCarNumber = new TradeDealDto(WRONG_CAR_NUMBER, PERSON_ID, PURCHASE_DATE);
+	TradeDealDto tradeDealWrongId = new TradeDealDto(CAR_NUMBER, -10l, PURCHASE_DATE);
 	private String[] expectedCarMissingFieldsMessages = {
 			MISSING_CAR_MODEL_MESSAGE,
 			MISSING_CAR_NUMBER_MESSAGE
@@ -81,6 +85,7 @@ class CarsControllerTest {
 		assertEquals(jsonCarDto, actualJSON );
 		
 	}
+
 	@Test
 	void testAddPerson() throws Exception {
 		when(carsService.addPerson(personDto)).thenReturn(personDto);
@@ -90,6 +95,7 @@ class CarsControllerTest {
 		.getContentAsString();
 		assertEquals(jsonPersonDto, actualJSON );
 	}
+
 	@Test
 	void testUpdatePerson() throws Exception{
 		when(carsService.updatePerson(personDtoUpdated)).thenReturn(personDtoUpdated);
@@ -99,6 +105,7 @@ class CarsControllerTest {
 		.getContentAsString();
 		assertEquals(jsonPersonDtoUpdated, actualJSON );
 	}
+
 	@Test
 	void testPurchase() throws Exception{
 		when(carsService.purchase(tradeDeal)).thenReturn(tradeDeal);
@@ -108,6 +115,7 @@ class CarsControllerTest {
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		assertEquals(jsonTradeDeal, actualJSON);
 	}
+
 	@Test
 	void testDeletePerson() throws Exception{
 		when(carsService.deletePerson(PERSON_ID)).thenReturn(personDto);
@@ -116,6 +124,7 @@ class CarsControllerTest {
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		assertEquals(jsonExpected, actualJSON);
 	}
+
 	@Test
 	void testDeleteCar() throws Exception {
 		when(carsService.deleteCar(CAR_NUMBER)).thenReturn(carDto);
@@ -124,6 +133,7 @@ class CarsControllerTest {
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		assertEquals(jsonExpected, actualJSON);
 	}
+
 	@Test
 	void testGetOwnerCars() throws Exception {
 		CarDto [] expectedArray = {
@@ -135,6 +145,7 @@ class CarsControllerTest {
 				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 		assertEquals(jsonExpected, actualJSON);
 	}
+
 	@Test
 	void testGetCarOwner() throws Exception{
 		when(carsService.getCarOwner(CAR_NUMBER)).thenReturn(personDto);
@@ -173,7 +184,9 @@ class CarsControllerTest {
 		assertEquals(CAR_ALREADY_EXISTS_MESSAGE, response );
 		
 	}
+
 	
+
 	@Test
 	void testUpdatePersonNotFound() throws Exception{
 		when(carsService.updatePerson(personDtoUpdated)).thenThrow(new NotFoundException(PERSON_NOT_FOUND_MESSAGE));
@@ -183,6 +196,7 @@ class CarsControllerTest {
 		.getContentAsString();
 		assertEquals(PERSON_NOT_FOUND_MESSAGE, response );
 	}
+
 	@Test
 	void testPurchaseCarNotFound() throws Exception{
 		testPurchaseNotFound(CAR_NOT_FOUND_MESSAGE);
@@ -191,6 +205,7 @@ class CarsControllerTest {
 	void testPurchasePersonNotFound() throws Exception{
 		testPurchaseNotFound(PERSON_NOT_FOUND_MESSAGE);
 	}
+
 	private void testPurchaseNotFound(String message)
 			throws JsonProcessingException, UnsupportedEncodingException, Exception {
 		when(carsService.purchase(tradeDeal)).thenThrow(new NotFoundException(message));
@@ -200,7 +215,9 @@ class CarsControllerTest {
 				.andExpect(status().isNotFound()).andReturn().getResponse().getContentAsString();
 		assertEquals(message, response);
 	}
+
 	
+
 	@Test
 	void testDeleteCarNotFound() throws Exception {
 		when(carsService.deleteCar(CAR_NUMBER)).thenThrow(new NotFoundException(CAR_NOT_FOUND_MESSAGE));
@@ -208,6 +225,7 @@ class CarsControllerTest {
 				.andExpect(status().isNotFound()).andReturn().getResponse().getContentAsString();
 		assertEquals(CAR_NOT_FOUND_MESSAGE, response);
 	}
+
 	@Test
 	void testGetOwnerCarsPersonNotFound() throws Exception {
 		
@@ -216,6 +234,7 @@ class CarsControllerTest {
 				.andExpect(status().isNotFound()).andReturn().getResponse().getContentAsString();
 		assertEquals(PERSON_NOT_FOUND_MESSAGE, response);
 	}
+
 	@Test
 	void testGetCarOwnerCarNotFound() throws Exception{
 		when(carsService.getCarOwner(CAR_NUMBER)).thenThrow(new NotFoundException(CAR_NOT_FOUND_MESSAGE));
@@ -236,6 +255,7 @@ class CarsControllerTest {
 	@Test
 	void addPersonWrongIdTest() throws Exception {
 		wrongPersonDataRequest(personWrongId, WRONG_MAX_PERSON_ID_VALUE);
+
 	}
 	@Test
 	void addPersonWrongIdTypeTest() throws Exception {
@@ -303,4 +323,5 @@ class CarsControllerTest {
 				.andExpect(status().isBadRequest()).andReturn().getResponse().getContentAsString();
 		assertEquals(expectedMessage, response);
 	}
+
 }

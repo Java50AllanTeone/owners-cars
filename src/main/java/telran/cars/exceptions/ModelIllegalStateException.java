@@ -2,9 +2,9 @@ package telran.cars.exceptions;
 
 import telran.cars.api.ServiceExceptionMessages;
 
-public class IllegalModelsStateException extends IllegalStateException {
+public class ModelIllegalStateException extends IllegalStateException {
 
-	public IllegalModelsStateException() {
+	public ModelIllegalStateException() {
 		super(ServiceExceptionMessages.MODEL_ALREADY_EXISTS);
 	}
 }

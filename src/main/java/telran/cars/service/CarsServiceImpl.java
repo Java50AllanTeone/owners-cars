@@ -1,6 +1,7 @@
 package telran.cars.service;
 
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -138,7 +139,7 @@ public class CarsServiceImpl implements CarsService {
 	public ModelDto addModel(ModelDto modelDto) {
 		ModelYear modelYear = new ModelYear(modelDto.getModelName(), modelDto.getModelYear());
 		if(modelRepo.existsById(modelYear)) {
-			throw new IllegalModelsStateException();
+			throw new ModelIllegalStateException();
 		}
 		Model model = Model.of(modelDto);
 		modelRepo.save(model);
@@ -148,9 +149,13 @@ public class CarsServiceImpl implements CarsService {
 	@Override
 	public List<ModelNameAmount> mostPopularModelNames(int nModels) {
 		List<ModelNameAmount> res = modelRepo.findMostPopularModelNames(nModels);
-		res.forEach(mn -> log.debug("model name is {}, number of cars {}",
-				mn.getName(), mn.getAmount()));
+		logModelNameAmounts(res);
 		return res;
+	}
+
+	private void logModelNameAmounts(List<ModelNameAmount> list) {
+		list.forEach(mn -> log.debug("model name is {}, number of cars {}",
+				mn.getName(), mn.getAmount()));
 	}
 
 	@Override
@@ -160,8 +165,12 @@ public class CarsServiceImpl implements CarsService {
 	 * Try to apply only interface method name without @Query annotation
 	 */
 	public long countTradeDealAtMonthModel(String modelName, int month, int year) {
-		// TODO Auto-generated method stub
-		return 0;
+		LocalDate date1 = LocalDate.of(year, month, 1);
+		LocalDate date2 = date1.with(TemporalAdjusters.lastDayOfMonth());
+		long res = tradeDealRepo.countByCarModelModelYearNameAndDateBetween(modelName,date1,date2);
+		log.debug("count of trade deals on year {}, month {}, of model {} is {}",
+				year, month, modelName, res);
+		return res;
 	}
 
 	@Override
@@ -170,9 +179,20 @@ public class CarsServiceImpl implements CarsService {
 	 *  model names and appropriate amounts of the cars,
 	 * owners of which have an age in a given range
 	 */
-	public List<ModelNameAmount> mostPopularModelNameByOwnerAges(int nModels, int ageFrom, int ageTo) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<ModelNameAmount> mostPopularModelNameByOwnerAges(int nModels,
+			int ageFrom, int ageTo) {
+		LocalDate birthDate1 = getBirthDate(ageTo);
+		LocalDate birthDate2 = getBirthDate(ageFrom);
+		List<ModelNameAmount> res = modelRepo.findPopularModelNameOwnerAges(nModels,
+				birthDate1, birthDate2);
+		logModelNameAmounts(res);
+		
+		return res;
+	}
+
+	private LocalDate getBirthDate(int age) {
+		
+		return LocalDate.now().minusYears(age);
 	}
 
 	@Override
@@ -180,8 +200,9 @@ public class CarsServiceImpl implements CarsService {
 	 * returns one most popular color of a given model
 	 */
 	public String oneMostPopularColorModel(String model) {
-		// TODO Auto-generated method stub
-		return null;
+		String res = carRepo.findOneMostPopularColorModel(model);
+		log.debug("most popular color of {} is {}", model, res);
+		return res;
 	}
 
 	@Override
@@ -190,8 +211,14 @@ public class CarsServiceImpl implements CarsService {
 	 * of car owners having an age in a given range
 	 */
 	public EnginePowerCapacity minEnginePowerCapacityByOwnerAges(int ageFrom, int ageTo) {
-		// TODO Auto-generated method stub
-		return null;
+		LocalDate birthDate1 = getBirthDate(ageTo);
+		LocalDate birthDate2 = getBirthDate(ageFrom);
+		EnginePowerCapacity res =
+				carRepo.findMinPowerCapcityOwnerBirthDates(birthDate1, birthDate2);
+		log.debug("min engine capacity is {}, min power is {} of cars belonging to "
+				+ "owners of ages {}-{}", res.getCapacity(), res.getPower(),
+				ageFrom, ageTo);
+		return res;
 	}
 
 }
